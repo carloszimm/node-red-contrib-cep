@@ -1,0 +1,310 @@
+<script type="text/javascript">
+    RED.nodes.registerType('cepAggr',{
+        name: "cep aggr",
+		    category: 'cep',
+        color: '#2ecc71',
+        defaults: {
+			       filters: {value: [], required: false},
+             property: {value:"payload", required:true, validate: RED.validators.typedInput("msg")},
+             eventName: {required: true},
+             windowType: {value:"count", required: true},
+             windowParam: {value: 0, required: true},
+             avg: {required: false},
+             avgField: {required: false},
+             avgAlias: {required: false},
+             count: {required: false},
+             countAlias: {required: false},
+             max: {required: false},
+             maxField: {required: false},
+             maxAlias: {required: false},
+             median: {required: false},
+             medianField: {required: false},
+             medianAlias: {required: false},
+             min: {required: false},
+             minField: {required: false},
+             minAlias: {required: false},
+             stdev: {required: false},
+             stdevField: {required: false},
+             stdevAlias: {required: false},
+             sum: {required: false},
+             sumField: {required: false},
+             sumAlias: {required: false},
+             variance: {required: false},
+             varianceField: {required: false},
+             varianceAlias: {required: false},
+             newEvent: {required: false},
+             fields: {required: false},
+             groupby: {required: false},
+             having: {required: false}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "arrow-in.png",
+        label: function() {
+            return this.name||"cep aggr";
+        },
+        paletteLabel: "cep aggr",
+        labelStyle: "cep aggr",
+        inputLabels: "event stream",
+        outputLabels: "new event",
+        oneditprepare: function() {
+          var node = this;
+
+          //creates an typedInput
+          $("#node-input-property").typedInput({default: 'msg',types:['msg']});
+
+          //creates an editableList
+          $("#node-input-filters-container").css('min-height','150px').css('min-width','450px').editableList({
+          	removable: true,
+          	addButton: false,
+          	addItem: function(row, index, data) {
+          		$(row).html(`filter(${data})`);
+          	}
+          });
+
+          //adds items to editableList from filters
+          if(node.filters && node.filters.length != 0){
+            for(let i = 0; i < node.filters.length; i++){
+          	 $("#node-input-filters-container").editableList('addItem', node.filters[i]);
+            }
+          }
+
+          //registers callback to add itens to editableList
+          $("#addFilter").click(function(){
+          	let filterParameter = $("#filter").val();
+          	$("#node-input-filters-container").editableList('addItem', filterParameter);
+          });
+
+          $(".aggregate").change(function(){
+            if(this.checked){
+              if(this.id == "node-input-avg"){
+                $(".averageOptions").prop("disabled", false);
+              }else if(this.id == "node-input-count"){
+                $(".countOptions").prop("disabled", false);
+              }else if(this.id == "node-input-max"){
+                $(".maxOptions").prop("disabled", false);
+              }else if(this.id == "node-input-median"){
+                $(".medianOptions").prop("disabled", false);
+              }else if(this.id == "node-input-min"){
+                $(".minOptions").prop("disabled", false);
+              }else if(this.id == "node-input-stdev"){
+                $(".stdevOptions").prop("disabled", false);
+              }else if(this.id == "node-input-sum"){
+                $(".sumOptions").prop("disabled", false);
+              }else{
+                $(".varOptions").prop("disabled", false);
+              }
+            }else{
+              if(this.id == "node-input-avg"){
+                $(".averageOptions").prop("disabled", true);
+              }else if(this.id == "node-input-count"){
+                $(".countOptions").prop("disabled", true);
+              }else if(this.id == "node-input-max"){
+                $(".maxOptions").prop("disabled", true);
+              }else if(this.id == "node-input-median"){
+                $(".medianOptions").prop("disabled", true);
+              }else if(this.id == "node-input-min"){
+                $(".minOptions").prop("disabled", true);
+              }else if(this.id == "node-input-stdev"){
+                $(".stdevOptions").prop("disabled", true);
+              }else if(this.id == "node-input-sum"){
+                $(".sumOptions").prop( "disabled", true);
+              }else{
+                $(".varOptions").prop("disabled", true);
+              }
+            }
+          });
+
+          if($("#node-input-fields").val()){
+            $("#fieldsText").val($("#node-input-fields").val());
+          }
+
+          $("#fieldsText").change(function(){
+            $("#node-input-fields").val($(this).val());
+          });
+		    },
+    		oneditsave: function() {
+    			var node = this;
+
+          //cleans the list and readds all the values (new and old) again
+    			node.filters = [];
+    			var filters = $("#node-input-filters-container").editableList('items');
+
+    			filters.each(function(i) {
+            let filter = $(this).data('data');
+              node.filters.push(filter);
+    			});
+    		}
+        });
+</script>
+
+<script type="text/x-red" data-template-name="cepAggr">
+
+	<div class="form-row">
+		<label for="node-input-property"> Property</label>
+		<input type="text" id="node-input-property" style="width: 70%"/>
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-eventName"><i class="fa fa-clock-o"></i> Event Name</label>
+		<input type="text" id="node-input-eventName" style="width: 70%"/>
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-windowType"><i class="fa fa-arrows-h"></i> Window</label>
+		<select id="node-input-windowType" style="width: 40%">
+			<option value="counter">Count Window</option>
+			<option value="timer">Time Window</option>
+		</select>
+		<input type="text" id="node-input-windowParam" placeholder="Window Parameter" style="width: 30%;">
+	</div>
+
+  <div class="form-row">
+    <label for="node-input-groupby"><i class="fa fa-users"></i> Group By</label>
+    <input type="text" id="node-input-groupby" style="width: 35%">
+    <input type="text" id="node-input-having" style="width: 35%" placeholder="Having">
+  </div>
+
+	<div class="form-row">
+		<label for="filter"><i class="fa fa-filter"></i> Filter</label>
+    <input type="text" id="filter" placeholder="filtering parameter..."  style="width: 60%;">
+    <button type="button" id="addFilter" class="btn btn-primary"
+    style="border-radius:0; box-shadow: none; padding: 6px 12px;">Add</button>
+	</div>
+
+	<div class="form-row node-input-filters-container-row">
+        <ol id="node-input-filters-container"></ol>
+  </div>
+
+  <div id="average" class="form-row" style="margin: 0 5px;">
+    <div style="width: 20%; float: left;">
+      <input type="checkbox" id="node-input-avg" value="average"
+      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> AVG
+    </div>
+    <div style="width: 80%; float: left;">
+      <input type="text" id="node-input-avgField" placeholder="Field"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="averageOptions">
+      <input type="text" id="node-input-avgAlias" placeholder="Alias"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="averageOptions">
+    </div>
+  </div>
+
+  <div id="count" class="form-row" style="clear: both; margin: 0 5px;">
+    <div style="width: 20%; float: left;">
+      <input type="checkbox" id="node-input-count" value="count"
+      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> COUNT
+    </div>
+    <div style="width: 80%; float: left;">
+      <input type="text" id="node-input-countField" placeholder="Field"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="countOptions" value="*">
+      <input type="text" id="node-input-countAlias" placeholder="Alias"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="countOptions">
+    </div>
+  </div>
+
+  <div id="max" class="form-row" style="clear: both; margin: 0 5px;">
+    <div style="width: 20%; float: left;">
+      <input type="checkbox" id="node-input-max" value="max"
+      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> MAX
+    </div>
+    <div style="width: 80%; float: left;">
+      <input type="text" id="node-input-maxField" placeholder="Field"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="maxOptions">
+      <input type="text" id="node-input-maxAlias" placeholder="Alias"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="maxOptions">
+    </div>
+  </div>
+
+  <div id="median" class="form-row" style="clear: both; margin: 0 5px;">
+    <div style="width: 20%; float: left;">
+      <input type="checkbox" id="node-input-median" value="median"
+      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> MEDIAN
+    </div>
+    <div style="width: 80%; float: left;">
+      <input type="text" id="node-input-medianField" placeholder="Field"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="medianOptions">
+      <input type="text" id="node-input-medianAlias" placeholder="Alias"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="medianOptions">
+    </div>
+  </div>
+
+  <div id="min" class="form-row" style="clear: both; margin: 0 5px;">
+    <div style="width: 20%; float: left;">
+      <input type="checkbox" id="node-input-min" value="min"
+      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> MIN
+    </div>
+    <div style="width: 80%; float: left;">
+      <input type="text" id="node-input-minField" placeholder="Field"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="minOptions">
+      <input type="text" id="node-input-minAlias" placeholder="Alias"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="minOptions">
+    </div>
+  </div>
+
+  <div id="stdev" class="form-row" style="clear: both; margin: 0 5px;">
+    <div style="width: 20%; float: left;">
+      <input type="checkbox" id="node-input-stdev" value="stdev"
+      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> STDEV
+    </div>
+    <div style="width: 80%; float: left;">
+      <input type="text" id="node-input-stdevField" placeholder="Field"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="stdevOptions">
+      <input type="text" id="node-input-stdevAlias" placeholder="Alias"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="stdevOptions">
+    </div>
+  </div>
+
+  <div id="sum" class="form-row" style="clear: both; margin: 0 5px;">
+    <div style="width: 20%; float: left;">
+      <input type="checkbox" id="node-input-sum" value="sum"
+      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> SUM
+    </div>
+    <div style="width: 80%; float: left;">
+      <input type="text" id="node-input-sumField" placeholder="Field"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="sumOptions">
+      <input type="text" id="node-input-sumAlias" placeholder="Alias"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="sumOptions">
+    </div>
+  </div>
+
+  <div id="varAggr" class="form-row" style="clear: both; margin: 0 5px;">
+    <div style="width: 20%; float: left;">
+      <input type="checkbox" id="node-input-variance" value="variance"
+      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> VAR
+    </div>
+    <div style="width: 80%; float: left;">
+      <input type="text" id="node-input-varianceField" placeholder="Field"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="varOptions">
+      <input type="text" id="node-input-varianceAlias" placeholder="Alias"
+      style="width: 45%; margin: 5px 0;" disabled="true" class="varOptions">
+    </div>
+  </div>
+
+  <div class="form-row" style="clear: both;">
+    <label for="node-input-newEvent"><i class="fa fa-clock-o"></i> Generated Event</label>
+    <input type="text" id="node-input-newEvent" style="width: 70%" />
+  </div>
+
+  <div class="form-row" style="clear: both; margin-bottom: 200px;">
+    <label for="fieldsText"><i class="fa fa-list-alt"></i> Selected Fields</label>
+    <textarea rows="3" style="width: 70%; resize: vertical;" id="fieldsText"></textarea>
+    <input type="text" id="node-input-fields" style="display: none;" />
+  </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="cepAggr">
+	<p>Aggregation operations to be carried over an event stream.</p>
+	<ul>
+		<li><b>Property: </b>Indicates which object on <code>msg</code> carries the event information.</li>
+		<li><b>Event Name: </b>Indicates the name of the event. Used to refer to some attribute from the object that carries the event properties.</li>
+		<li><b>Window: </b>Shows the types of windows that can be used on the stream.</li>
+		<li><b>Window Parameter[number]: </b>Used to inform how many events a Window should store (count window) or how long(milliseconds) it should be collecting events (time window).</li>
+    <li><b>Group By: </b>A comma separeted list of properties that events should be grouped by.</li>
+    <li><b>Having: </b>Works with Group By. It imposes a constraint based on aggregate function.</li>
+    <li><b>Filter: </b>You can write any numbers of filters to be used on event properties. You are allowed to use logic operations as well following the javascript syntax, e.g. <code>&&</code>, <code>||</code>, etc.</li>
+    <li><b>Aggregate Operators: </b>To perform an operation, you just need to check a checkbox, inform the property that the operation should operate on, and optionally an alias.</li>
+		<li><b>Generated Event: </b>Indicates the the name of the new event generated. It is placed on <code>msg.event.eventName</code>.</li>
+		<li><b>Selected Fields: </b>A comma separated list of event's fields that should be included on the output event. Alias can be used just like SQL using the AS keyword.</li>
+	</ul>
+</script>

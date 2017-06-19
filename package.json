@@ -1,0 +1,26 @@
+{
+  "name": "node-red-contrib-cep",
+  "version": "0.0.1",
+  "description": "A set of nodes that can be used to create complex event processing operations",
+  "dependencies": {
+    "alasql": "0.4.0",
+    "boolean-parser": "0.0.2",
+    "lodash" : "4.17.4",
+    "pamatcher": "0.3.0",
+    "rxjs": "5.4.0",
+    "safe-eval": "0.3.0"
+  },
+  "keywords": [],
+  "node-red": {
+    "nodes": {
+      "cep aggr": "cep/cepAggr.js",
+      "cep pattern": "cep/cepPattern.js",
+      "cep join": "cep/cepJoin.js"
+    }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "",
+    "url": ""
+  }
+}

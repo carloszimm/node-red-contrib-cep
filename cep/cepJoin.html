@@ -1,0 +1,160 @@
+<script type="text/javascript">
+    RED.nodes.registerType('cepJoin',{
+        name: "cep join",
+        category: 'cep',
+        color: '#2ecc71',
+        defaults: {
+			       filters: {value: [], required: false},
+             property: {value:"payload", required:true, validate: RED.validators.typedInput("msg")},
+             eventName1: {required: true},
+             eventName2: {required: true},
+             windowType1: {value:"count", required: true},
+             windowParam1: {value: 0, required: true, validate: RED.validators.number()},
+             windowType2: {value:"count", required: true},
+             windowParam2: {value: 0, required: true, validate: RED.validators.number()},
+             joinClause: {required: true},
+             newEvent: {required: false},
+             fields: {required: false}
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "arrow-in.png",
+        label: function() {
+            return this.name||"cep join";
+        },
+        paletteLabel: "cep join",
+        labelStyle: "cep join",
+        inputLabels: "event stream",
+        outputLabels: "new event",
+        oneditprepare: function() {
+          var node = this;
+
+          //creates an typedInput
+          $("#node-input-property").typedInput({default: 'msg',types:['msg']});
+
+          //creates an editableList
+          $("#node-input-filters-container").css('min-height','150px').css('min-width','450px').editableList({
+          	removable: true,
+          	addButton: false,
+          	addItem: function(row, index, data) {
+          		$(row).html(`filter(${data.filterParameter}) from ${data.filterEvent}`);
+          	}
+          });
+
+          //adds items to editableList from filters
+          if(node.filters && node.filters.length != 0){
+            for(let i = 0; i < node.filters.length; i++){
+          	 $("#node-input-filters-container").editableList('addItem', node.filters[i]);
+            }
+          }
+
+          //registers callback to add itens to editableList
+          $("#addFilter").click(function(){
+            let filterEvent = $("#filterEvent").val();
+          	let filterParameter = $("#filter").val();
+          	$("#node-input-filters-container").editableList('addItem', {"filterEvent": filterEvent, "filterParameter": filterParameter});
+          });
+
+          if($("#node-input-fields").val()){
+            $("#fieldsText").val($("#node-input-fields").val());
+          }
+
+          $("#fieldsText").change(function(){
+            $("#node-input-fields").val($(this).val());
+          });
+		    },
+    		oneditsave: function() {
+    			var node = this;
+
+          //cleans the list and readds all the values (new and old) again
+    			node.filters = [];
+    			var filters = $("#node-input-filters-container").editableList('items');
+
+    			filters.each(function(i) {
+            let filter = $(this).data('data');
+            node.filters.push(filter);
+    			});
+    		}
+        });
+</script>
+
+<script type="text/x-red" data-template-name="cepJoin">
+
+	<div class="form-row">
+		<label for="node-input-property"> Property</label>
+		<input type="text" id="node-input-property" style="width: 70%"/>
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-eventName1">Event Name #1</label>
+		<input type="text" id="node-input-eventName1" style="width: 70%"/>
+	</div>
+
+  <div class="form-row">
+		<label for="node-input-windowType1"><i class="fa fa-arrows-h"></i> Window</label>
+		<select id="node-input-windowType1" style="width: 40%">
+			<option value="counter">Count Window</option>
+			<option value="timer">Time Window</option>
+		</select>
+		<input type="text" id="node-input-windowParam1" placeholder="Window Parameter" style="width: 30%;">
+	</div>
+
+  <div class="form-row">
+		<label for="node-input-eventName2">Event Name #2</label>
+		<input type="text" id="node-input-eventName2" style="width: 70%"/>
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-windowType2"><i class="fa fa-arrows-h"></i> Window</label>
+		<select id="node-input-windowType2" style="width: 40%">
+			<option value="counter">Count Window</option>
+			<option value="timer">Time Window</option>
+		</select>
+		<input type="text" id="node-input-windowParam2" placeholder="Window Parameter" style="width: 30%;">
+	</div>
+
+	<div class="form-row">
+		<label for="filterEvent"><i class="fa fa-filter"></i> Filter</label>
+    <select id="filterEvent" style="width: 20%;">
+      <option value="Event#1">Event #1</option>
+      <option value="Event#2">Event #2</option>
+    </select>
+    <input type="text" id="filter" placeholder="filtering parameter..."  style="width: 40%;">
+    <button type="button" id="addFilter" class="btn btn-primary"
+    style="border-radius:0; box-shadow: none; padding: 6px 12px;">Add</button>
+	</div>
+
+	<div class="form-row node-input-filters-container-row">
+        <ol id="node-input-filters-container"></ol>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-joinClause"><i class="fa fa-handshake-o"></i> Join Clause</label>
+    <input type="text" id="node-input-joinClause" style="width: 70%" />
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-newEvent"><i class="fa fa-clock-o"></i> Generated Event</label>
+    <input type="text" id="node-input-newEvent" style="width: 70%" />
+  </div>
+
+  <div class="form-row">
+    <label for="fieldsText"><i class="fa fa-list-alt"></i> Selected Fields</label>
+    <textarea rows="3" style="width: 70%; resize: vertical;" id="fieldsText"></textarea>
+    <input type="text" id="node-input-fields" style="display: none;" />
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="cepJoin">
+  <p>A join operation to be carried out on two events.</p>
+  <ul>
+    <li><b>Property: </b>Indicates which object on <code>msg</code> carries the event information.</li>
+    <li><b>Event Name #1 and #2: </b>Indicate the name of the events. Used to refer to some attribute from the object that carries the event properties.</li>
+    <li><b>Window: </b>Shows the types of windows that can be used on the streams.</li>
+    <li><b>Window Parameter[number]: </b>Used to inform how many events a Window should store (count window), or how long(milliseconds) it should be collecting events (time window).</li>
+    <li><b>Filter: </b>You can write any numbers of filters to be used on event properties. You are allowed to use logic operations as well following the javascript syntax, <code>&&</code>, <code>||</code>, etc.</li>
+    <li><b>Join Clause: </b>Used to bind events together using properties from both events.</li>
+    <li><b>Generated Event: </b>Indicates the the name of the new event generated. It is placed on <code>msg.event.eventName</code>.</li>
+    <li><b>Selected Fields: </b>A comma separated list of event's fields that should be included on the output event. Alias can be used just like SQL using the AS keyword.</li>
+  </ul>
+</script>
