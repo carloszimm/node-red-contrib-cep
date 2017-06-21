@@ -1,6 +1,8 @@
 node-red-contrib-cep
 ===================
 
+![Sense hat example](https://drive.google.com/uc?export=view&id=0BzfGWK0OB5yhaWtRMEEwTEhaQXM)
+
 node-red-contrib-cep is a package that bundles a set of Node-RED nodes that can be used to perform complex event processing (CEP) operations.
 
 Currently, there are three nodes implemented that represent three different CEP patterns:
