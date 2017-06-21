@@ -2,7 +2,7 @@ node-red-contrib-cep
 ===================
 
 ![Sense hat example](https://drive.google.com/uc?export=view&id=0BzfGWK0OB5yhaWtRMEEwTEhaQXM)
-<i><sup>Sense hat simulation example</sup></i>
+<b><i><sup>Sense hat simulation example</sup></i></b>
 
 node-red-contrib-cep is a package that bundles a set of Node-RED nodes that can be used to perform complex event processing (CEP) operations.
 
