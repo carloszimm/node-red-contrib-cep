@@ -10,7 +10,7 @@
     "rxjs": "5.4.0",
     "safe-eval": "0.3.0"
   },
-  "keywords": [],
+  "keywords": ["Complex Event Processing", "cep"],
   "node-red": {
     "nodes": {
       "cep aggr": "cep/cepAggr.js",
@@ -20,7 +20,7 @@
   },
   "license": "MIT",
   "repository": {
-    "type": "",
-    "url": ""
+    "type": "git",
+    "url": "https://github.com/CeZL/node-red-contrib-cep"
   }
 }
