@@ -9,8 +9,8 @@ node-red-contrib-cep is a package that bundles a set of Node-RED nodes that can 
 Currently, there are three nodes implemented that represent three different CEP patterns:
 
  - cep aggr: performs aggregation
- - cep join: joins events from two different nodes
- - cep pattern: checks pattern against events from two different nodes
+ - cep join: joins events from two different events
+ - cep pattern: checks pattern against events from two different events
 
 Motivation
 ------
