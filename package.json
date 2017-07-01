@@ -11,6 +11,7 @@
     "safe-eval": "0.3.0"
   },
   "keywords": [
+	"node-red",
     "Complex Event Processing",
     "cep"
   ],
