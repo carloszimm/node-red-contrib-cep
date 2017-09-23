@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-cep",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "A set of nodes that can be used to create complex event processing operations",
   "dependencies": {
     "alasql": "0.4.0",
@@ -16,7 +16,7 @@
     "cep"
   ],
   "files": [
-    "cep/"
+    "cep"
   ],
   "node-red": {
     "nodes": {
