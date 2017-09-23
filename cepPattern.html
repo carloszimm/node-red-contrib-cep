@@ -1,6 +1,6 @@
 <script type="text/javascript">
     RED.nodes.registerType('cepPattern',{
-        name: "cep pattern",
+        name: "pattern",
         category: 'cep',
         color: '#2ecc71',
         defaults: {
@@ -19,10 +19,10 @@
         outputs: 1,
         icon: "arrow-in.png",
         label: function() {
-            return this.name||"cep pattern";
+            return this.name||"pattern";
         },
-        paletteLabel: "cep pattern",
-        labelStyle: "cep pattern",
+        paletteLabel: "pattern",
+        labelStyle: "pattern",
         inputLabels: "event stream",
         outputLabels: "new event",
         oneditprepare: function() {

@@ -1,6 +1,6 @@
 <script type="text/javascript">
     RED.nodes.registerType('cepAggr',{
-        name: "cep aggr",
+        name: "aggregation",
 		    category: 'cep',
         color: '#2ecc71',
         defaults: {
@@ -41,10 +41,10 @@
         outputs: 1,
         icon: "arrow-in.png",
         label: function() {
-            return this.name||"cep aggr";
+            return this.name||"aggregation";
         },
-        paletteLabel: "cep aggr",
-        labelStyle: "cep aggr",
+        paletteLabel: "aggregation",
+        labelStyle: "aggregation",
         inputLabels: "event stream",
         outputLabels: "new event",
         oneditprepare: function() {

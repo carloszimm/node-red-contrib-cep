@@ -1,6 +1,6 @@
 <script type="text/javascript">
     RED.nodes.registerType('cepJoin',{
-        name: "cep join",
+        name: "join",
         category: 'cep',
         color: '#2ecc71',
         defaults: {
@@ -20,10 +20,10 @@
         outputs: 1,
         icon: "arrow-in.png",
         label: function() {
-            return this.name||"cep join";
+            return this.name||"join";
         },
-        paletteLabel: "cep join",
-        labelStyle: "cep join",
+        paletteLabel: "join",
+        labelStyle: "join",
         inputLabels: "event stream",
         outputLabels: "new event",
         oneditprepare: function() {
