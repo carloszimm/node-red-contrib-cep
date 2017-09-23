@@ -85,12 +85,12 @@
 	</div>
 
 	<div class="form-row">
-		<label for="node-input-eventType1">Event Name #1</label>
+		<label for="node-input-eventType1">Event Type #1</label>
 		<input type="text" id="node-input-eventType1" style="width: 70%"/>
 	</div>
 
   <div class="form-row">
-		<label for="node-input-eventType2">Event Name #2</label>
+		<label for="node-input-eventType2">Event Type #2</label>
 		<input type="text" id="node-input-eventType2" style="width: 70%"/>
 	</div>
 
@@ -145,13 +145,13 @@
   <p>A join operation to be carried out on two events.</p>
   <ul>
     <li><b>Property: </b>Indicates which object on <code>msg</code> carries the event information.</li>
-    <li><b>Event Name #1 and #2: </b>Indicate the name of the events. Used to refer to some attribute from the object that carries the event properties.</li>
+    <li><b>Event Type #1 and #2: </b>Indicate the types of the events. Used to refer to event's attributes on the object/message carrying the event's properties.</li>
     <li><b>Window: </b>Shows the types of windows that can be used on the streams.</li>
     <li><b>Window Parameter[number]: </b>Used to inform how many events a Window should store (count window), or how long(milliseconds) it should be collecting events (time window).</li>
     <li><b>Filter: </b>You can write any numbers of filters to be used on event properties. You are allowed to use logic operations as well following the javascript syntax, e.g. <code>&&</code>, <code>||</code>, etc.</li>
     <li><b>Pattern: </b> Enables the creation of some patten to be checked on the events stored on the window. Operators allowed: AND, OR and <b>,</b>(comma).</li>
     <li><b>Join Clause: </b>Used to bind events together using properties from both events.</li>
-    <li><b>Generated Event: </b>Indicates the the name of the new event generated. It is placed on <code>msg.event.eventType</code>.</li>
+    <li><b>Generated Event: </b>Indicates the type of the new event generated. It is placed on <code>msg.event.eventType</code>.</li>
     <li><b>Selected Fields: </b>A comma separated list of event's fields that should be included on the output event. Alias can be used just like SQL using the AS keyword.</li>
   </ul>
 </script>
