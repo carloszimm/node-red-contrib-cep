@@ -6,7 +6,7 @@
         defaults: {
 			       filters: {value: [], required: false},
              property: {value:"payload", required:true, validate: RED.validators.typedInput("msg")},
-             eventName: {required: true},
+             eventType: {required: true},
              windowType: {value:"count", required: true},
              windowParam: {value: 0, required: true},
              avg: {required: false},
@@ -146,8 +146,8 @@
 	</div>
 
 	<div class="form-row">
-		<label for="node-input-eventName"><i class="fa fa-clock-o"></i> Event Name</label>
-		<input type="text" id="node-input-eventName" style="width: 70%"/>
+		<label for="node-input-eventType"><i class="fa fa-clock-o"></i> Event Type</label>
+		<input type="text" id="node-input-eventType" style="width: 70%"/>
 	</div>
 
 	<div class="form-row">
@@ -297,14 +297,14 @@
 	<p>Aggregation operations to be carried over an event stream.</p>
 	<ul>
 		<li><b>Property: </b>Indicates which object on <code>msg</code> carries the event information.</li>
-		<li><b>Event Name: </b>Indicates the name of the event. Used to refer to some attribute from the object that carries the event properties.</li>
+		<li><b>Event Type: </b>Indicates the type of the event. Used to refer to events' attributes on the object/message carrying them.</li>
 		<li><b>Window: </b>Shows the types of windows that can be used on the stream.</li>
 		<li><b>Window Parameter[number]: </b>Used to inform how many events a Window should store (count window) or how long(milliseconds) it should be collecting events (time window).</li>
     <li><b>Group By: </b>A comma separeted list of properties that events should be grouped by.</li>
     <li><b>Having: </b>Works with Group By. It imposes a constraint based on aggregate function.</li>
     <li><b>Filter: </b>You can write any numbers of filters to be used on event properties. You are allowed to use logic operations as well following the javascript syntax, e.g. <code>&&</code>, <code>||</code>, etc.</li>
     <li><b>Aggregate Operators: </b>To perform an operation, you just need to check a checkbox, inform the property that the operation should operate on, and optionally an alias.</li>
-		<li><b>Generated Event: </b>Indicates the the name of the new event generated. It is placed on <code>msg.event.eventName</code>.</li>
+		<li><b>Generated Event: </b>Indicates the event type name of the new event generated. It is placed on <code>msg.event.eventType</code>.</li>
 		<li><b>Selected Fields: </b>A comma separated list of event's fields that should be included on the output event. Alias can be used just like SQL using the AS keyword.</li>
 	</ul>
 </script>

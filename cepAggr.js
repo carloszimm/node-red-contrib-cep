@@ -49,7 +49,7 @@ module.exports = function(RED) {
       //getting the values from html
       node.filters = config.filters || [];
       node.property = config.property || "payload";
-      node.eventName = config.eventName || "";
+      node.eventType = config.eventType || "";
       node.windowType = config.windowType || "counter";
       node.windowParam = config.windowParam || 0;
 
@@ -113,13 +113,13 @@ module.exports = function(RED) {
           if(node.groupby){
             if(node.having){
               query = aggregQueryGroupByHaving;
-              query = util.format(query, aggregateSelect, node.eventName, node.groupby, node.having);
+              query = util.format(query, aggregateSelect, node.eventType, node.groupby, node.having);
             }else{
               query = aggregQueryGroupBy;
-              query = util.format(query, aggregateSelect, node.eventName, node.groupby);
+              query = util.format(query, aggregateSelect, node.eventType, node.groupby);
             }
           }else{
-            query = util.format(query, aggregateSelect, node.eventName);
+            query = util.format(query, aggregateSelect, node.eventType);
           }
 
           //creates a mapping function according to property informed by the user
@@ -127,7 +127,7 @@ module.exports = function(RED) {
 
           //creates and evaluates filtering function
           for(let i in node.filters){
-            node.filters[i] = safeEval(buildLambda(node.filters[i], node.eventName));
+            node.filters[i] = safeEval(buildLambda(node.filters[i], node.eventType));
           }
 
           //creates an Observable/stream from input event and maps each emition of msg to msg.[property] (informed by the user)
@@ -153,7 +153,7 @@ module.exports = function(RED) {
               if(emitedWindow && emitedWindow.length > 0){
                 var result = alasql(query, [emitedWindow]);
                 _.forEach(result, (obj) => {
-                  msg.event = {eventName: node.newEvent};
+                  msg.event = {eventType: node.newEvent};
                   _.forEach(obj, (value, key) => {
                     if(value != undefined){
                       if(_.isNumber(value)){

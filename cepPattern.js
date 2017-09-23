@@ -37,15 +37,15 @@ var stringIdentifier = require("./helperFunctions.js").stringIdentifier;
 
 //pseudo identifiers used to create event names that will be used on the processing and to insert timestamps to infer
 //the order that the events arrive on the node
-const pseudoEventName1 = stringIdentifier();
-const pseudoEventName2 = stringIdentifier();
+const pseudoEventType1 = stringIdentifier();
+const pseudoEventType2 = stringIdentifier();
 
 const pseudoTimestamp = stringIdentifier();
 const pseudoTimestamp1 = stringIdentifier();
 const pseudoTimestamp2 = stringIdentifier();
 
 //query
-const queryFullOuterJoin = `SELECT '%s' AS eventName, %s.eventName AS ${pseudoEventName1}, %s.eventName AS ${pseudoEventName2}, %s.${pseudoTimestamp} AS ${pseudoTimestamp1}, %s.${pseudoTimestamp} AS ${pseudoTimestamp2} %s FROM ? %s FULL OUTER JOIN ? %s ON %s`;
+const queryFullOuterJoin = `SELECT '%s' AS eventType, %s.eventType AS ${pseudoEventType1}, %s.eventType AS ${pseudoEventType2}, %s.${pseudoTimestamp} AS ${pseudoTimestamp1}, %s.${pseudoTimestamp} AS ${pseudoTimestamp2} %s FROM ? %s FULL OUTER JOIN ? %s ON %s`;
 
 //pattern to be used on pamatcher
 const pattern = "[{repeat: (x) => x}, %s, {repeat: (x) => x}]";
@@ -62,8 +62,8 @@ module.exports = function(RED) {
       //getting the values from html
       var filters = config.filters || [];
       node.property = config.property || "payload";
-      node.eventName1 = config.eventName1;
-      node.eventName2 = config.eventName2;
+      node.eventType1 = config.eventType1;
+      node.eventType2 = config.eventType2;
       node.windowType = config.windowType || "counter";
       node.windowParam = config.windowParam || 0;
       node.pattern = config.pattern;
@@ -71,7 +71,7 @@ module.exports = function(RED) {
       node.newEvent = config.newEvent || "patternEvent";
       node.fields = config.fields || "";
 
-      if(node.windowParam > 0 && node.eventName1 && node.eventName2 && node.pattern && node.joinClause){
+      if(node.windowParam > 0 && node.eventType1 && node.eventType2 && node.pattern && node.joinClause){
 
       var matcher, fullQuery, parsedPattern = "", parsedArray, parsedString, separator = "";
 
@@ -82,15 +82,15 @@ module.exports = function(RED) {
       node.filterEvent2 = filters.filter(filterRule => filterRule.filterEvent == "Event#2");
 
       for(let i in node.filterEvent1){
-        node.filterEvent1[i] = safeEval(buildLambda(`${node.filterEvent1[i].filterParameter}`, node.eventName1));
+        node.filterEvent1[i] = safeEval(buildLambda(`${node.filterEvent1[i].filterParameter}`, node.eventType1));
       }
 
       for(let i in node.filterEvent2){
-        node.filterEvent2[i] = safeEval(buildLambda(`${node.filterEvent2[i].filterParameter}`, node.eventName2));
+        node.filterEvent2[i] = safeEval(buildLambda(`${node.filterEvent2[i].filterParameter}`, node.eventType2));
       }
 
       // preparing the query
-      fullQuery = util.format(queryFullOuterJoin, node.newEvent, node.eventName1, node.eventName2, node.eventName1, node.eventName2, node.fields ? `, ${node.fields}`: node.fields, node.eventName1, node.eventName2, node.joinClause);
+      fullQuery = util.format(queryFullOuterJoin, node.newEvent, node.eventType1, node.eventType2, node.eventType1, node.eventType2, node.fields ? `, ${node.fields}`: node.fields, node.eventType1, node.eventType2, node.joinClause);
 
       //builds the pattern
       //each comma will be used as delimiter to build the pattern
@@ -118,8 +118,8 @@ module.exports = function(RED) {
       //inserts a timestamp used to control data's arrival
       inputEvent = inputEvent.map(event => {event[pseudoTimestamp] = (+new Date()); return event});
 
-      var eventStream1 = inputEvent.filter(event1 => event1.eventName == node.eventName1);
-      var eventStream2 = inputEvent.filter(event2 => event2.eventName == node.eventName2);
+      var eventStream1 = inputEvent.filter(event1 => event1.eventType == node.eventType1);
+      var eventStream2 = inputEvent.filter(event2 => event2.eventType == node.eventType2);
 
       for(let i in node.filterEvent1){
         eventStream1 = eventStream1.filter(node.filterEvent1[i]);
@@ -144,8 +144,8 @@ module.exports = function(RED) {
 
       combined.subscribe({
         next: (combinedStream) => {
-          let arrayStream1 = combinedStream.filter(event1 => event1.eventName == node.eventName1).toArray();
-          let arrayStream2 = combinedStream.filter(event2 => event2.eventName == node.eventName2).toArray();
+          let arrayStream1 = combinedStream.filter(event1 => event1.eventType == node.eventType1).toArray();
+          let arrayStream2 = combinedStream.filter(event2 => event2.eventType == node.eventType2).toArray();
           //subscribes to each stream and output both the results together
           var joinStream = Rx.Observable.zip(
                             arrayStream1,
@@ -161,21 +161,21 @@ module.exports = function(RED) {
               //loops trough each object output
               _.forEach(joinResult, (value) =>{
                 //temporary objects to check the pattern
-                let eventA = {eventName: value[pseudoEventName1], pseudoTimestamp: value[pseudoTimestamp1]};
-                let eventB = {eventName: value[pseudoEventName2], pseudoTimestamp: value[pseudoTimestamp2]};
+                let eventA = {eventType: value[pseudoEventType1], pseudoTimestamp: value[pseudoTimestamp1]};
+                let eventB = {eventType: value[pseudoEventType2], pseudoTimestamp: value[pseudoTimestamp2]};
                 let comb = [eventA, eventB];
 
                 comb = _.orderBy(comb, ["pseudoTimestamp"], ["asc"]);
                 //hack to prevent null since the pamatcher doesn't work with null but with undefined is ok
-                eventA = comb[0].eventName? comb[0].eventName: undefined;
-                eventB = comb[1].eventName? comb[1].eventName: undefined;
+                eventA = comb[0].eventType? comb[0].eventType: undefined;
+                eventB = comb[1].eventType? comb[1].eventType: undefined;
                 comb = [eventA, eventB];
 
                 let result = matcher.exec(comb);
 
                 if(result.test){
                   //removes temporary values
-                  value = _.omit(value, [pseudoEventName1, pseudoEventName2, pseudoTimestamp1, pseudoTimestamp2]);
+                  value = _.omit(value, [pseudoEventType1, pseudoEventType2, pseudoTimestamp1, pseudoTimestamp2]);
                   //creates the event with the fields selected by the user
                   msg.event = value;
                   //sends the message to the output

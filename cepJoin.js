@@ -33,7 +33,7 @@ var util = require('util');
 var buildLambda = require("./helperFunctions.js").buildLambda;
 
 //query
-const joinQuery = "SELECT '%s' AS eventName %s FROM ? %s INNER JOIN ? %s ON %s";
+const joinQuery = "SELECT '%s' AS eventType %s FROM ? %s INNER JOIN ? %s ON %s";
 
 module.exports = function(RED) {
 
@@ -48,17 +48,17 @@ module.exports = function(RED) {
       //getting the values from html
       var filters = config.filters || [];
       node.property = config.property || "payload";
-      node.eventName1 = config.eventName1;
+      node.eventType1 = config.eventType1;
       var windowType1 = config.windowType1 || "counter";
       var windowParam1 = config.windowParam1 || 0;
-      node.eventName2 = config.eventName2;
+      node.eventType2 = config.eventType2;
       var windowType2 = config.windowType2 || "counter";
       var windowParam2 = config.windowParam2 || 0;
       node.joinClause = config.joinClause;
       node.newEvent = config.newEvent || "joinEvent";
       node.fields = config.fields || "";
 
-      if(windowParam1 > 0 && windowParam2 > 0 && node.eventName1 && node.eventName2 && node.joinClause){
+      if(windowParam1 > 0 && windowParam2 > 0 && node.eventType1 && node.eventType2 && node.joinClause){
         node.windows = [];
         node.windows.push({"windowType": windowType1, "windowParam": windowParam1});
         node.windows.push({"windowType": windowType2, "windowParam": windowParam2});
@@ -72,25 +72,25 @@ module.exports = function(RED) {
 
         //creates the lambda/arrow functions for the filters
         for(let i in node.filterEvent1){
-          node.filterEvent1[i] = safeEval(buildLambda(node.filterEvent1[i].filterParameter, node.eventName1));
+          node.filterEvent1[i] = safeEval(buildLambda(node.filterEvent1[i].filterParameter, node.eventType1));
         }
 
         for(let i in node.filterEvent2){
-          node.filterEvent2[i] = safeEval(buildLambda(node.filterEvent2[i].filterParameter, node.eventName2));
+          node.filterEvent2[i] = safeEval(buildLambda(node.filterEvent2[i].filterParameter, node.eventType2));
         }
 
         //preparing the join query
-        var query = util.format(joinQuery, node.newEvent, node.fields ? `, ${node.fields}`: node.fields, node.eventName1, node.eventName2, node.joinClause);
+        var query = util.format(joinQuery, node.newEvent, node.fields ? `, ${node.fields}`: node.fields, node.eventType1, node.eventType2, node.joinClause);
 
         //creates the observable/stream from input event and maps each emition of msg to msg.[property] (informed by the user)
         var inputEvent = Rx.Observable.fromEvent(node, 'input').map(mapping);
         var subject = new Rx.Subject();
         var multicasted = inputEvent.multicast(subject);
 
-        //filters the main stream and separates it based on eventName
-        var eventStream1 = multicasted.filter(event1 => event1.eventName == node.eventName1);
+        //filters the main stream and separates it based on eventType
+        var eventStream1 = multicasted.filter(event1 => event1.eventType == node.eventType1);
 
-        var eventStream2 = multicasted.filter(event2 => event2.eventName == node.eventName2);
+        var eventStream2 = multicasted.filter(event2 => event2.eventType == node.eventType2);
 
         //filters each stream
         for(let i in node.filterEvent1){

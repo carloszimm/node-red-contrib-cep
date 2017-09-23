@@ -6,8 +6,8 @@
         defaults: {
 			       filters: {value: [], required: false},
              property: {value:"payload", required:true, validate: RED.validators.typedInput("msg")},
-             eventName1: {required: true},
-             eventName2: {required: true},
+             eventType1: {required: true},
+             eventType2: {required: true},
              windowType: {value:"count", required: true},
              windowParam: {value: 0, required: true, validate: RED.validators.number()},
              pattern: {required: true},
@@ -85,13 +85,13 @@
 	</div>
 
 	<div class="form-row">
-		<label for="node-input-eventName1">Event Name #1</label>
-		<input type="text" id="node-input-eventName1" style="width: 70%"/>
+		<label for="node-input-eventType1">Event Name #1</label>
+		<input type="text" id="node-input-eventType1" style="width: 70%"/>
 	</div>
 
   <div class="form-row">
-		<label for="node-input-eventName2">Event Name #2</label>
-		<input type="text" id="node-input-eventName2" style="width: 70%"/>
+		<label for="node-input-eventType2">Event Name #2</label>
+		<input type="text" id="node-input-eventType2" style="width: 70%"/>
 	</div>
 
   <div class="form-row">
@@ -151,7 +151,7 @@
     <li><b>Filter: </b>You can write any numbers of filters to be used on event properties. You are allowed to use logic operations as well following the javascript syntax, e.g. <code>&&</code>, <code>||</code>, etc.</li>
     <li><b>Pattern: </b> Enables the creation of some patten to be checked on the events stored on the window. Operators allowed: AND, OR and <b>,</b>(comma).</li>
     <li><b>Join Clause: </b>Used to bind events together using properties from both events.</li>
-    <li><b>Generated Event: </b>Indicates the the name of the new event generated. It is placed on <code>msg.event.eventName</code>.</li>
+    <li><b>Generated Event: </b>Indicates the the name of the new event generated. It is placed on <code>msg.event.eventType</code>.</li>
     <li><b>Selected Fields: </b>A comma separated list of event's fields that should be included on the output event. Alias can be used just like SQL using the AS keyword.</li>
   </ul>
 </script>
