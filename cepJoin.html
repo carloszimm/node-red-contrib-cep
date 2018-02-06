@@ -14,7 +14,7 @@
              windowParam2: {value: 0, required: true, validate: RED.validators.number()},
              joinClause: {required: true},
              newEvent: {required: false},
-             fields: {required: false}
+             fieldsList: {value: [{}], required: false}
         },
         inputs: 1,
         outputs: 1,
@@ -55,12 +55,22 @@
           	$("#node-input-filters-container").editableList('addItem', {"filterEvent": filterEvent, "filterParameter": filterParameter});
           });
 
-          if($("#node-input-fields").val()){
-            $("#fieldsText").val($("#node-input-fields").val());
-          }
+          $("#node-input-field-container").css('min-height','150px').css('min-width','450px').editableList({
+            removable: true,
+            sortable: true,
+            addItem: function(container, index, data) {
+              
+                var row = $('<div/>').appendTo(container);
+                $('<input/>',{class:"node-input-field-property-name",type:"text",
+                  placeholder:"Field",value:data.field?data.field:""}).appendTo(row);
+                $('<input/>',{class:"node-input-field-property-alias",type:"text",
+                  placeholder:"Alias",value:data.alias?data.alias:"",
+                  style:"width:110px; margin-left:10px;"}).appendTo(row);
+            }
+          });
 
-          $("#fieldsText").change(function(){
-            $("#node-input-fields").val($(this).val());
+          node.fieldsList.forEach(function(value){
+            $("#node-input-field-container").editableList('addItem', value);
           });
 		    },
     		oneditsave: function() {
@@ -74,6 +84,21 @@
             let filter = $(this).data('data');
             node.filters.push(filter);
     			});
+
+          node.fieldsList = [];
+          var fields = $("#node-input-field-container").editableList('items');
+          fields.each(function(i){
+            var fieldItem = $(this),
+            propertyName = fieldItem.find(".node-input-field-property-name").val(),
+            propertyAlias = fieldItem.find(".node-input-field-property-alias").val();
+            
+            if(propertyName){
+              node.fieldsList.push({
+                field:propertyName,
+                alias:propertyAlias
+              });
+            }
+          });
     		}
         });
 </script>
@@ -138,10 +163,12 @@
     <input type="text" id="node-input-newEvent" style="width: 70%" />
   </div>
 
-  <div class="form-row">
-    <label for="fieldsText"><i class="fa fa-list-alt"></i> Selected Fields</label>
-    <textarea rows="3" style="width: 70%; resize: vertical;" id="fieldsText"></textarea>
-    <input type="text" id="node-input-fields" style="display: none;" />
+  <div class="form-row" style="margin-bottom:0;">
+    <label><i class="fa fa-list-alt"></i> Fields</label>
+  </div>
+
+  <div class="form-row node-input-fields-container-row">
+    <ol id="node-input-field-container"></ol>
   </div>
 </script>
 

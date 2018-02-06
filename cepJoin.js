@@ -56,7 +56,7 @@ module.exports = function(RED) {
       var windowParam2 = config.windowParam2 || 0;
       node.joinClause = config.joinClause;
       node.newEvent = config.newEvent || "joinEvent";
-      node.fields = config.fields || "";
+      node.fieldsList = config.fieldsList || [];
 
       if(windowParam1 > 0 && windowParam2 > 0 && node.eventType1 && node.eventType2 && node.joinClause){
         node.windows = [];
@@ -79,8 +79,20 @@ module.exports = function(RED) {
           node.filterEvent2[i] = safeEval(buildLambda(node.filterEvent2[i].filterParameter, node.eventType2));
         }
 
+        var joinSelect = "";
+
+        if(node.fieldsList.length > 0){
+          node.fieldsList.forEach(function(data){
+            if(data.alias){
+              joinSelect += (`, ${data.field} AS ${data.alias}`);
+            }else if(data.field){
+              joinSelect += (", " + data.field);
+            }
+          });
+        }
+
         //preparing the join query
-        var query = util.format(joinQuery, node.newEvent, node.fields ? `, ${node.fields}`: node.fields, node.eventType1, node.eventType2, node.joinClause);
+        var query = util.format(joinQuery, node.newEvent, joinSelect, node.eventType1, node.eventType2, node.joinClause);
 
         //creates the observable/stream from input event and maps each emition of msg to msg.[property] (informed by the user)
         var inputEvent = Rx.Observable.fromEvent(node, 'input').map(mapping);

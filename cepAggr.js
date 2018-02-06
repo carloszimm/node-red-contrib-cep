@@ -86,14 +86,15 @@ module.exports = function(RED) {
       node[`${node.varianceAlias}Field`] = config.varianceField ? `VAR(${config.varianceField})` : "";
 
       node.newEvent = config.newEvent || "aggregateEvent";
-      node.fields = config.fields;
+      node.fieldsList = config.fieldsList || [];
 
       node.groupby = config.groupby;
       node.having = config.having;
 
       if(node.windowParam > 0){
 
-        var aliases = [node.avgAlias, node.countAlias, node.maxAlias, node.medianAlias, node.minAlias, node.stdevAlias, node.sumAlias, node.varianceAlias];
+        var aliases = [node.avgAlias, node.countAlias, node.maxAlias, node.medianAlias,
+                        node.minAlias, node.stdevAlias, node.sumAlias, node.varianceAlias];
         var aggregateSelect = "", separator = "";
 
         for(let i = 0; i < aliases.length; i++){
@@ -103,8 +104,16 @@ module.exports = function(RED) {
           }
         }
 
-        if(node.fields){
-          aggregateSelect+= (separator + node.fields);
+        if(node.fieldsList.length > 0){
+          node.fieldsList.forEach(function(data){
+            if(data.alias){
+              aggregateSelect += (`${separator}${data.field} AS ${data.alias}`);
+              separator = ", ";
+            }else if(data.field){
+              aggregateSelect += (separator + data.field);
+              separator = ", ";
+            }
+          });
         }
 
         if(aggregateSelect){

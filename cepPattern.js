@@ -69,7 +69,7 @@ module.exports = function(RED) {
       node.pattern = config.pattern;
       node.joinClause = config.joinClause;
       node.newEvent = config.newEvent || "patternEvent";
-      node.fields = config.fields || "";
+      node.fieldsList = config.fieldsList || [];
 
       if(node.windowParam > 0 && node.eventType1 && node.eventType2 && node.pattern && node.joinClause){
 
@@ -89,8 +89,20 @@ module.exports = function(RED) {
         node.filterEvent2[i] = safeEval(buildLambda(`${node.filterEvent2[i].filterParameter}`, node.eventType2));
       }
 
+      var patternSelect = "";
+
+      if(node.fieldsList.length > 0){
+          node.fieldsList.forEach(function(data){
+            if(data.alias){
+              patternSelect += `, ${data.field} AS ${data.alias}`;
+            }else if(data.field){
+              patternSelect += (", "+ data.field);
+            }
+          });
+        }
+
       // preparing the query
-      fullQuery = util.format(queryFullOuterJoin, node.newEvent, node.eventType1, node.eventType2, node.eventType1, node.eventType2, node.fields ? `, ${node.fields}`: node.fields, node.eventType1, node.eventType2, node.joinClause);
+      fullQuery = util.format(queryFullOuterJoin, node.newEvent, node.eventType1, node.eventType2, node.eventType1, node.eventType2, patternSelect, node.eventType1, node.eventType2, node.joinClause);
 
       //builds the pattern
       //each comma will be used as delimiter to build the pattern
