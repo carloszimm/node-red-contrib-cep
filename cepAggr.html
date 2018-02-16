@@ -9,33 +9,11 @@
              eventType: {required: true},
              windowType: {value:"count", required: true},
              windowParam: {value: 0, required: true},
-             avg: {required: false},
-             avgField: {required: false},
-             avgAlias: {required: false},
-             count: {required: false},
-             countAlias: {required: false},
-             max: {required: false},
-             maxField: {required: false},
-             maxAlias: {required: false},
-             median: {required: false},
-             medianField: {required: false},
-             medianAlias: {required: false},
-             min: {required: false},
-             minField: {required: false},
-             minAlias: {required: false},
-             stdev: {required: false},
-             stdevField: {required: false},
-             stdevAlias: {required: false},
-             sum: {required: false},
-             sumField: {required: false},
-             sumAlias: {required: false},
-             variance: {required: false},
-             varianceField: {required: false},
-             varianceAlias: {required: false},
              newEvent: {required: false},
              groupby: {required: false},
              having: {required: false},
-             fieldsList: {value: [{}], required: false}
+             fieldsList: {value: [{}], required: false},
+             aggrOpList: {value: [{}], required: false}
         },
         inputs: 1,
         outputs: 1,
@@ -49,6 +27,17 @@
         outputLabels: "new event",
         oneditprepare: function() {
           var node = this;
+
+          var aggregateOp = [
+            {op:"AVG", field:"", alias:""},
+            {op:"COUNT", field:"*", alias:""},
+            {op:"MAX", field:"", alias:""},
+            {op:"MEDIAN", field:"", alias:""},
+            {op:"MIN", field:"", alias:""},
+            {op:"STDEV", field:"", alias:""},
+            {op:"SUM", field:"", alias:""},
+            {op:"VAR", field:"", alias:""}
+          ];
 
           //creates an typedInput
           $("#node-input-property").typedInput({default: 'msg',types:['msg']});
@@ -75,46 +64,6 @@
           	$("#node-input-filters-container").editableList('addItem', filterParameter);
           });
 
-          $(".aggregate").change(function(){
-            if(this.checked){
-              if(this.id == "node-input-avg"){
-                $(".averageOptions").prop("disabled", false);
-              }else if(this.id == "node-input-count"){
-                $(".countOptions").prop("disabled", false);
-              }else if(this.id == "node-input-max"){
-                $(".maxOptions").prop("disabled", false);
-              }else if(this.id == "node-input-median"){
-                $(".medianOptions").prop("disabled", false);
-              }else if(this.id == "node-input-min"){
-                $(".minOptions").prop("disabled", false);
-              }else if(this.id == "node-input-stdev"){
-                $(".stdevOptions").prop("disabled", false);
-              }else if(this.id == "node-input-sum"){
-                $(".sumOptions").prop("disabled", false);
-              }else{
-                $(".varOptions").prop("disabled", false);
-              }
-            }else{
-              if(this.id == "node-input-avg"){
-                $(".averageOptions").prop("disabled", true);
-              }else if(this.id == "node-input-count"){
-                $(".countOptions").prop("disabled", true);
-              }else if(this.id == "node-input-max"){
-                $(".maxOptions").prop("disabled", true);
-              }else if(this.id == "node-input-median"){
-                $(".medianOptions").prop("disabled", true);
-              }else if(this.id == "node-input-min"){
-                $(".minOptions").prop("disabled", true);
-              }else if(this.id == "node-input-stdev"){
-                $(".stdevOptions").prop("disabled", true);
-              }else if(this.id == "node-input-sum"){
-                $(".sumOptions").prop( "disabled", true);
-              }else{
-                $(".varOptions").prop("disabled", true);
-              }
-            }
-          });
-
           $("#node-input-field-container").css('min-height','150px').css('min-width','450px').editableList({
             removable: true,
             sortable: true,
@@ -132,7 +81,54 @@
           node.fieldsList.forEach(function(value){
             $("#node-input-field-container").editableList('addItem', value);
           });
-          
+
+          $("#node-input-aggregate-container").css('min-height','150px').css('min-width','450px').editableList({
+            removable: true,
+            sortable: true,
+            addItem: function(container, index, data) {
+                
+                if($.isEmptyObject(data)){
+                  data = aggregateOp[0];
+                }
+
+                var row = $('<div/>').appendTo(container);
+
+                var selectField = $('<select/>',{class:"node-input-aggregate-op",
+                  style:"width:70px;"}).appendTo(row);
+
+                var propertyField = $('<input/>',{class:"node-input-aggregate-field",
+                  type:"text",placeholder:"Field",
+                  style:"width:195px; margin-left:10px;"}).appendTo(row);
+                var propertyAlias = $('<input/>',{class:"node-input-aggregate-alias",
+                  type:"text",placeholder:"Alias",
+                  style:"width:115px; margin-left:10px;"}).appendTo(row);
+
+                aggregateOp.forEach(function(value){
+                  selectField.append($("<option></option>").val(value.op).text(value.op));
+                });
+
+                selectField.change(function(){
+                  if(!propertyField.val() || propertyField.val() === "*"){
+                    var op = $(this).val();
+                    
+                    aggregateOp.forEach(function(value){
+                      if(value.op === op){
+                        propertyField.val(value.field);
+                        propertyAlias.val(value.alias);
+                      }
+                    });
+                  }                 
+                });
+                
+                selectField.val(data.op);
+                propertyField.val(data.field);
+                propertyAlias.val(data.alias);
+            }
+          });
+
+          node.aggrOpList.forEach(function(value){
+            $("#node-input-aggregate-container").editableList('addItem', value);
+          });
 		    },
     		oneditsave: function() {
     			var node = this;
@@ -160,8 +156,23 @@
               });
             }
           });
+
+          node.aggrOpList = [];
+          var aggrOps = $("#node-input-aggregate-container").editableList('items');
+          aggrOps.each(function(i){
+            var aggrItem = $(this),
+            aggregateOp = {
+              op: aggrItem.find(".node-input-aggregate-op").val(),
+              field: aggrItem.find(".node-input-aggregate-field").val(),
+              alias: aggrItem.find(".node-input-aggregate-alias").val()
+            };
+            
+            if(aggregateOp.field){
+              node.aggrOpList.push(aggregateOp);
+            }
+          });
     		}
-        });
+    });
 </script>
 
 <script type="text/x-red" data-template-name="cepAggr">
@@ -202,117 +213,21 @@
         <ol id="node-input-filters-container"></ol>
   </div>
 
-  <div id="average" class="form-row" style="margin: 0 5px;">
-    <div style="width: 20%; float: left;">
-      <input type="checkbox" id="node-input-avg" value="average"
-      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> AVG
-    </div>
-    <div style="width: 80%; float: left;">
-      <input type="text" id="node-input-avgField" placeholder="Field"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="averageOptions">
-      <input type="text" id="node-input-avgAlias" placeholder="Alias"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="averageOptions">
-    </div>
-  </div>
-
-  <div id="count" class="form-row" style="clear: both; margin: 0 5px;">
-    <div style="width: 20%; float: left;">
-      <input type="checkbox" id="node-input-count" value="count"
-      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> COUNT
-    </div>
-    <div style="width: 80%; float: left;">
-      <input type="text" id="node-input-countField" placeholder="Field"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="countOptions" value="*">
-      <input type="text" id="node-input-countAlias" placeholder="Alias"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="countOptions">
-    </div>
-  </div>
-
-  <div id="max" class="form-row" style="clear: both; margin: 0 5px;">
-    <div style="width: 20%; float: left;">
-      <input type="checkbox" id="node-input-max" value="max"
-      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> MAX
-    </div>
-    <div style="width: 80%; float: left;">
-      <input type="text" id="node-input-maxField" placeholder="Field"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="maxOptions">
-      <input type="text" id="node-input-maxAlias" placeholder="Alias"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="maxOptions">
-    </div>
-  </div>
-
-  <div id="median" class="form-row" style="clear: both; margin: 0 5px;">
-    <div style="width: 20%; float: left;">
-      <input type="checkbox" id="node-input-median" value="median"
-      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> MEDIAN
-    </div>
-    <div style="width: 80%; float: left;">
-      <input type="text" id="node-input-medianField" placeholder="Field"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="medianOptions">
-      <input type="text" id="node-input-medianAlias" placeholder="Alias"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="medianOptions">
-    </div>
-  </div>
-
-  <div id="min" class="form-row" style="clear: both; margin: 0 5px;">
-    <div style="width: 20%; float: left;">
-      <input type="checkbox" id="node-input-min" value="min"
-      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> MIN
-    </div>
-    <div style="width: 80%; float: left;">
-      <input type="text" id="node-input-minField" placeholder="Field"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="minOptions">
-      <input type="text" id="node-input-minAlias" placeholder="Alias"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="minOptions">
-    </div>
-  </div>
-
-  <div id="stdev" class="form-row" style="clear: both; margin: 0 5px;">
-    <div style="width: 20%; float: left;">
-      <input type="checkbox" id="node-input-stdev" value="stdev"
-      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> STDEV
-    </div>
-    <div style="width: 80%; float: left;">
-      <input type="text" id="node-input-stdevField" placeholder="Field"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="stdevOptions">
-      <input type="text" id="node-input-stdevAlias" placeholder="Alias"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="stdevOptions">
-    </div>
-  </div>
-
-  <div id="sum" class="form-row" style="clear: both; margin: 0 5px;">
-    <div style="width: 20%; float: left;">
-      <input type="checkbox" id="node-input-sum" value="sum"
-      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> SUM
-    </div>
-    <div style="width: 80%; float: left;">
-      <input type="text" id="node-input-sumField" placeholder="Field"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="sumOptions">
-      <input type="text" id="node-input-sumAlias" placeholder="Alias"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="sumOptions">
-    </div>
-  </div>
-
-  <div id="varAggr" class="form-row" style="clear: both; margin: 0 5px;">
-    <div style="width: 20%; float: left;">
-      <input type="checkbox" id="node-input-variance" value="variance"
-      style="display: inline; width:auto; margin: 13px 0;" class="aggregate"> VAR
-    </div>
-    <div style="width: 80%; float: left;">
-      <input type="text" id="node-input-varianceField" placeholder="Field"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="varOptions">
-      <input type="text" id="node-input-varianceAlias" placeholder="Alias"
-      style="width: 45%; margin: 5px 0;" disabled="true" class="varOptions">
-    </div>
-  </div>
-
-  <div class="form-row" style="clear: both;">
+  <div class="form-row">
     <label for="node-input-newEvent"><i class="fa fa-clock-o"></i> Generated Event</label>
     <input type="text" id="node-input-newEvent" style="width: 70%" />
   </div>
 
   <div class="form-row" style="margin-bottom:0;">
-    <label><i class="fa fa-list-alt"></i> Fields</label>
+    <label style="width: 200px;"><i class="fa fa-list-alt"></i> Aggregate Operators</label>
+  </div>
+
+  <div class="form-row node-input-aggregate-container-row">
+    <ol id="node-input-aggregate-container"></ol>
+  </div>
+
+  <div class="form-row" style="margin-bottom:0;">
+    <label style="width: 200px;"><i class="fa fa-list-alt"></i> Selected Fields</label>
   </div>
 
   <div class="form-row node-input-fields-container-row">
@@ -331,8 +246,8 @@
     <li><b>Group By: </b>A comma separeted list of properties that events should be grouped by.</li>
     <li><b>Having: </b>Works with Group By. It imposes a constraint based on aggregate function.</li>
     <li><b>Filter: </b>You can write any numbers of filters to be used on event properties. You are allowed to use logic operations as well following the javascript syntax, e.g. <code>&&</code>, <code>||</code>, etc.</li>
-    <li><b>Aggregate Operators: </b>To perform an operation, you just need to check a checkbox, inform the property that the operation should operate on, and optionally an alias.</li>
+    <li><b>Aggregate Operators: </b>To perform an operation, you just need to select one of the available operators, inform the property that the operation should operate on, and optionally an alias.</li>
 		<li><b>Generated Event: </b>Indicates the type of the new event generated. It is placed on <code>msg.event.eventType</code>.</li>
-		<li><b>Selected Fields: </b>A comma separated list of event's fields that should be included on the output event. Alias can be used just like SQL using the AS keyword.</li>
+		<li><b>Selected Fields: </b>A list of event's fields that should be included on the output event.</li>
 	</ul>
 </script>

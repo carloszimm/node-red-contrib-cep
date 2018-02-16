@@ -53,39 +53,8 @@ module.exports = function(RED) {
       node.windowType = config.windowType || "counter";
       node.windowParam = config.windowParam || 0;
 
-      node.avgAlias = config.avgAlias || "avgAggr";
-      node[node.avgAlias] = config.avg;
-      node[`${node.avgAlias}Field`] = config.avgField ? `AVG(${config.avgField})` : "";
-
-      node.countAlias = config.countAlias || "countAggr";
-      node[node.countAlias] = config.count;
-      node[`${node.countAlias}Field`] = config.countField ? `COUNT(${config.countField})` : "COUNT(*)";
-
-      node.maxAlias = config.maxAlias || "maxAggr";
-      node[node.maxAlias] = config.max;
-      node[`${node.maxAlias}Field`] = config.maxField ? `MAX(${config.maxField})` : "";
-
-      node.medianAlias = config.medianAlias || "medianAggr";
-      node[node.medianAlias] = config.median;
-      node[`${node.medianAlias}Field`] = config.medianField ? `MEDIAN(${config.medianField})` :  "";
-
-      node.minAlias = config.minAlias || "minAggr";
-      node[node.minAlias] = config.min;
-      node[`${node.minAlias}Field`] = config.minField ? `MIN(${config.minField})` :  "";
-
-      node.stdevAlias = config.stdevAlias || "stdevAggr";
-      node[node.stdevAlias] = config.stdev;
-      node[`${node.stdevAlias}Field`] = config.stdevField ? `STDEV(${config.stdevField})` : "";
-
-      node.sumAlias = config.sumAlias || "sumAggr";
-      node[node.sumAlias] = config.sum;
-      node[`${node.sumAlias}Field`] = config.sumField ? `SUM(${config.sumField})` : "";
-
-      node.varianceAlias = config.varianceAlias || "varAggr";
-      node[node.varianceAlias] = config.variance;
-      node[`${node.varianceAlias}Field`] = config.varianceField ? `VAR(${config.varianceField})` : "";
-
       node.newEvent = config.newEvent || "aggregateEvent";
+      node.aggrOpList = config.aggrOpList || [];
       node.fieldsList = config.fieldsList || [];
 
       node.groupby = config.groupby;
@@ -93,15 +62,28 @@ module.exports = function(RED) {
 
       if(node.windowParam > 0){
 
-        var aliases = [node.avgAlias, node.countAlias, node.maxAlias, node.medianAlias,
-                        node.minAlias, node.stdevAlias, node.sumAlias, node.varianceAlias];
+        var aliases = {
+          avgAlias:"avgAggr",
+          countAlias:"countAggr",
+          maxAlias:"maxAggr",
+          medianAlias:"medianAggr",
+          minAlias:"minAggr",
+          stdevAlias:"stdevAggr",
+          sumAlias:"sumAggr",
+          varAlias:"varAggr"
+        };
         var aggregateSelect = "", separator = "";
 
-        for(let i = 0; i < aliases.length; i++){
-          if(node[aliases[i]] && node[`${aliases[i]}Field`]){
-            aggregateSelect += (separator + node[`${aliases[i]}Field`] + " AS " + aliases[i]);
-            separator = ", ";
-          }
+        if(node.aggrOpList.length > 0){
+          node.aggrOpList.forEach(function(data){
+            if(data.alias){
+              aggregateSelect += `${separator}${data.op}(${data.field}) AS ${data.alias}`;
+              separator = ", ";
+            }else if(data.field){
+              aggregateSelect += `${separator}${data.op}(${data.field}) AS `+ aliases[`${data.op.toLowerCase()}Alias`];
+              separator = ", ";
+            }
+          });
         }
 
         if(node.fieldsList.length > 0){
