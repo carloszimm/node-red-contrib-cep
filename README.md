@@ -125,10 +125,6 @@ On the link bellow, you can find a simple example (google drive folder with JSON
 
 > **Note:** To use the MQTT nodes/protocol, I leveraged the free broker[HiveMQ Public Broker](http://www.hivemq.com/try-out/).
 
-Contact
-------
-Please, feel free to contact me through my <a href="mailto:cezl@cin.ufpe.br?subject=[cep-nodes] ">email</a> (place in front of the subject "[cep-nodes]") if you have any question, suggestion, or anything regarding the nodes. Also, you can open an issue if you come across a problem.
-
 License
 ------
 The MIT License (MIT)
