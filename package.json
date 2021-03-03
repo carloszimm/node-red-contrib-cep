@@ -3,7 +3,7 @@
   "version": "0.0.24",
   "description": "A set of nodes that can be used to create complex event processing operations",
   "dependencies": {
-    "alasql": "0.4.0",
+    "alasql": "0.7.0",
     "boolean-parser": "0.0.2",
     "lodash": "4.17.4",
     "pamatcher": "0.3.0",
