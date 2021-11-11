@@ -113,28 +113,14 @@ The following list summarizes the available current options present on the nodes
 
 > **Note 4:** For the equality in Join and Having clause, it can be used the JS equality sign ==  as well as the SQL single equal sign = . However, on the Filter operation, you are allowed only to use the JS manner. So, in any case, prefer the use of == to avoid unsurprising results.
 
-Future Releases
-------
-I intend on future releases to bring more features to the nodes, and, also, to create new ones that implement other CEP patterns/functionalities. Besides, I will be doing the properly enhancements in order to prioritize processing. Notice that I did not do any stress testing yet or measure the memory consumption on extreme situations either. Instead, I have trusted on the promise of the two main libraries, RxJS and AlaSQL. They both focus on speed and performance. Not to mention, RxJS was rewritten not long ago in order to enhance performance, modularity, and debuggable call stacks.  
-
 Example
 ------
 On the link bellow, you can find a simple example (google drive folder with JSON files containing the flows and screenshots). To use it, you just need to install the following nodes: [node-red-node-pi-sense-hat-simulator](https://github.com/node-red/node-red-nodes/tree/master/hardware/sensehatsim), [Repeat NodeRED Node](https://github.com/arnauorriols/node-red-contrib-repeat), and [node-red-dashboard](https://github.com/node-red/node-red-dashboard), and then import the flows on your node-RED. Basically, what it does is to take the temperature e humidity readings from sense hat simulator and calculate the standard deviation on both readings that were accumulated during a certain time by using the `aggregation` node. After that I check those deviations to see if the temperature or humidity have oscillated beyond a tolerance by applying filters and pattern checks (tempDeviation OR humdityDeviation) of the `pattern` node. If both were output, an alert in red is blinked on the led grid of the sense hat. Otherwise, if only one of them, a yellow alert is blinked instead. Moreover, utilizing a MQTT nodes, I simulated the sending of some of those data to a "remote" (this flow can also be found on the example folder) device that shows all of this data in the form of charts utilizing the node-red-dashboard to render those charts in a dashboard. Just like the alert on the sense hat that blinks, an alert is triggered on the dashboard too in the form of both a top right modal alert with color border depending on the type of alert (yellow or red) and alert voice informing a message as well.
 
-- [google drive folder](https://drive.google.com/drive/folders/0BzfGWK0OB5yhWXloRnhaOFBhNmc?usp=sharing)
+- [google drive folder](https://drive.google.com/drive/folders/0BzfGWK0OB5yhWXloRnhaOFBhNmc?resourcekey=0-MHWxufbKAfHIU1xoD7KFww&usp=sharing)
 
 > **Note:** To use the MQTT nodes/protocol, I leveraged the free broker[HiveMQ Public Broker](http://www.hivemq.com/try-out/).
 
 License
 ------
-The MIT License (MIT)
-
-Copyright (c) 2018 CeZL
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+node-red-contrib-cep is available under the MIT license. See the [LICENSE](https://github.com/carloszimm/node-red-contrib-cep/blob/master/LICENSE) file for more info.
